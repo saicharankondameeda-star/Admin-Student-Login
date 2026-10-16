@@ -1,0 +1,235 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin & Student Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #141e30, #243b55);
+        }
+
+        .login-container {
+            background: white;
+            width: 380px;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            text-align: center;
+            color: #243b55;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .role-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .role-buttons button {
+            width: 50%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #e9edf3;
+            color: #243b55;
+            font-weight: bold;
+        }
+
+        .role-buttons button.active {
+            background: #243b55;
+            color: white;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #243b55;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #243b55;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #141e30;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h2>Welcome Back!</h2>
+        <p class="subtitle">Login to your account</p>
+
+        <div class="role-buttons">
+            <button id="studentBtn" class="active"
+                onclick="selectRole('student')">
+                Student
+            </button>
+
+            <button id="adminBtn"
+                onclick="selectRole('admin')">
+                Admin
+            </button>
+        </div>
+
+        <form onsubmit="login(event)">
+
+            <label id="idLabel" for="userId">Student ID</label>
+            <input type="text" id="userId"
+                placeholder="Enter Student ID" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password"
+                placeholder="Enter password" required>
+
+            <button type="submit" class="login-btn">
+                Login
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+
+        <div class="footer">
+            Secure Login Portal
+        </div>
+
+    </div>
+
+    <script>
+        let selectedRole = "student";
+
+        function selectRole(role) {
+            selectedRole = role;
+
+            document.getElementById("studentBtn")
+                .classList.toggle("active", role === "student");
+
+            document.getElementById("adminBtn")
+                .classList.toggle("active", role === "admin");
+
+            document.getElementById("idLabel").textContent =
+                role === "student" ? "Student ID" : "Admin ID";
+
+            document.getElementById("userId").placeholder =
+                role === "student"
+                    ? "Enter Student ID"
+                    : "Enter Admin ID";
+
+            document.getElementById("message").textContent = "";
+        }
+
+        async function login(event) {
+            event.preventDefault();
+
+            const userId = document.getElementById("userId").value.trim();
+            const password = document.getElementById("password").value;
+
+            const message = document.getElementById("message");
+
+            message.style.color = "#d00";
+            message.textContent = "Checking credentials...";
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        password: password,
+                        role: selectedRole
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Login failed.");
+                }
+
+                message.style.color = "green";
+                message.textContent = "Login successful!";
+
+                window.location.href =
+                    selectedRole === "admin"
+                        ? "admin-dashboard.html"
+                        : "student-dashboard.html";
+
+            } catch (error) {
+                message.textContent =
+                    error.message === "Failed to fetch"
+                        ? "Cannot connect to the server."
+                        : error.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
+```
+ 
